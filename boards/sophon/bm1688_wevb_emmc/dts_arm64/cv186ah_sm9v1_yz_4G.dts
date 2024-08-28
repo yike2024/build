@@ -13,38 +13,40 @@
 		stdout-path = "serial2"; // "serial0:115200n8", no arguments means no re-initialization
 	};
 
-	memory@100000000 {
-		device_type = "memory";
-		reg = <0x1 0x00000000 0x3 0x00000000>;	//12G
-	};
-
 	reserved-memory {
 		#address-cells = <0x2>;
 		#size-cells = <0x2>;
 		ranges;
 #ifndef __UBOOT__
 		//0x1_0400_0000 - 0x1_2400_0000 for TPU (owner: zhuolin.li@sophgo.com)
-		//Don't move the TPU address
 		scalar_reserved: scalar_mem {
 			reg = <0x1 0x04000000 0x0 0x20000000>;  //512MB for TPU firmware
 			no-map;
 		};
 
+		//0x1_2c00_0000 - 0x1_5c00_0000 for TPU (owner: zhuolin.li@sophgo.com)
 		ion_for_npu: ion_npu_mem {
 			compatible = "npu-region";
-			reg = <0x2 0x00000000 0x0 0xC0000000>; // 3G, for npu
+			reg = <0x1 0x24000000 0x0 0x30000000>; // 768MB, for TPU
 		};
 
+		//0x1_5c00_0000 - 0x1_C000_0000 for VPP (owner: zhuolin.li@sophgo.com)
 		ion_for_vpp: ion_vpp_mem {
 			compatible = "vpp-region";
-			reg = <0x3 0x00000000 0x1 0x00000000>; // 4G, for TPU
+			reg = <0x1 0x5c000000 0x0 0x60000000>; // 1.5GB, for VPP
 		};
 #endif
 	};
 
 	pcie1:pcie@20400000 {
-		pipe-mode = <0x2>; //b'00 x2&&x2; b'10 sata&&x2
+		pipe-mode = <0x0>; //b'00 x2&&x2; b'10 sata&&x2
 		reset-gpio = <&porte 2 GPIO_ACTIVE_HIGH>; //gpio 130
+	};
+	
+	pcie0:pcie@20800000 {
+                status = "okay";
+                num-lanes = <1>; 
+		reset-gpio = <&porte 1 GPIO_ACTIVE_HIGH>; //gpio 129
 	};
 	
 	/delete-node/ cv-sd1;
@@ -112,21 +114,21 @@
 	
 	bsl_leds: bsl_leds { 
 		compatible = "gpio-leds";
-		disk-led {
-			label = "disk-blue";
-			gpios = <&portf 23 GPIO_ACTIVE_HIGH>;
+		wifi-led {
+			label = "led-wifi";
+			gpios = <&portb 29 GPIO_ACTIVE_HIGH>;
 			default-state = "off";
 		};
 
-		wan-led {
-			label = "wan-yellow";
+		net-led {
+			label = "led-4g";
+			gpios = <&portg 2 GPIO_ACTIVE_HIGH>;
+			default-state = "off";
+		};
+
+		sys-led {
 			gpios = <&portc 4 GPIO_ACTIVE_HIGH>;
-			default-state = "off";
-		};
-
-		sys_led {
-			gpios = <&portg 1 GPIO_ACTIVE_HIGH>;
-			label = "system-green";
+			label = "led-sys";
 			linux,default-trigger = "heartbeat";
 			default-state = "on";
 		};
@@ -176,7 +178,7 @@
 		regulator-min-microvolt = <5000000>;
 		regulator-max-microvolt = <5000000>;
 		enable-active-high;
-		gpios = <&portc 15 GPIO_ACTIVE_HIGH>;
+		gpios = <&portb 19 GPIO_ACTIVE_HIGH>;
 		vin-supply = <&vcc5v0_sys>;
 	};
 	
@@ -285,4 +287,8 @@
 
 &uart6 {
 	status = "okay";
+};
+
+&sata {
+	status = "disable";
 };

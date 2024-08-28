@@ -596,7 +596,7 @@ function update_bm1688_debs(){
   SOPHLITEOS_DIR=${TOP_DIR}/sophliteos/release
   cd ${TOP_DIR}/ubuntu/
   if [  -e "${TOP_DIR}/ubuntu/install" ]; then
-     rm -rf ${TOP_DIR}/ubuntu/install
+     sudo rm -rf ${TOP_DIR}/ubuntu/install
   fi
 
   pip3 install dfss --upgrade
@@ -657,7 +657,7 @@ function build_bm1688_edge()
 }
 
 function build_bm1688_all(){
-     #build_sophon_media || $? return
+     build_sophon_media || $? return
      build_bm1688_edge || $? return
      build_libsophon || $? return
      update_bm1688_debs || $? return
@@ -1028,9 +1028,9 @@ function build_package()
     sudo tar -zxf ../rootfs.tgz -C ./rootfs
     sudo cp -rf  $OUTPUT_DIR/rootfs/mnt/system rootfs/mnt/
     cd rootfs
-    echo "stty cols 160" >> $PACKAGE_OUTPUT_DIR/rootfs/home/linaro/.bashrc
-    echo "stty cols 160" >> $PACKAGE_OUTPUT_DIR/rootfs/root/.bashrc
-    mv home/linaro/* ../rootfs_rw
+    sudo echo "stty cols 160" >> $PACKAGE_OUTPUT_DIR/rootfs/home/linaro/.bashrc
+    sudo echo "stty cols 160" >> $PACKAGE_OUTPUT_DIR/rootfs/root/.bashrc
+    sudo mv home/linaro/* ../rootfs_rw
 
     sudo tar -zcf rootfs.tgz *
     mv rootfs.tgz ../

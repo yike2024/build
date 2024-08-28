@@ -13,31 +13,27 @@
 		stdout-path = "serial2"; // "serial0:115200n8", no arguments means no re-initialization
 	};
 
-	memory@100000000 {
-		device_type = "memory";
-		reg = <0x1 0x00000000 0x3 0x00000000>;	//12G
-	};
-
 	reserved-memory {
 		#address-cells = <0x2>;
 		#size-cells = <0x2>;
 		ranges;
 #ifndef __UBOOT__
 		//0x1_0400_0000 - 0x1_2400_0000 for TPU (owner: zhuolin.li@sophgo.com)
-		//Don't move the TPU address
 		scalar_reserved: scalar_mem {
 			reg = <0x1 0x04000000 0x0 0x20000000>;  //512MB for TPU firmware
 			no-map;
 		};
 
+		//0x1_2c00_0000 - 0x1_5c00_0000 for TPU (owner: zhuolin.li@sophgo.com)
 		ion_for_npu: ion_npu_mem {
 			compatible = "npu-region";
-			reg = <0x2 0x00000000 0x0 0xC0000000>; // 3G, for npu
+			reg = <0x1 0x24000000 0x0 0x30000000>; // 768MB, for TPU
 		};
 
+		//0x1_5c00_0000 - 0x1_C000_0000 for VPP (owner: zhuolin.li@sophgo.com)
 		ion_for_vpp: ion_vpp_mem {
 			compatible = "vpp-region";
-			reg = <0x3 0x00000000 0x1 0x00000000>; // 4G, for TPU
+			reg = <0x1 0x5c000000 0x0 0x60000000>; // 1.5GB, for VPP
 		};
 #endif
 	};
@@ -112,21 +108,28 @@
 	
 	bsl_leds: bsl_leds { 
 		compatible = "gpio-leds";
-		disk-led {
-			label = "disk-blue";
-			gpios = <&portf 23 GPIO_ACTIVE_HIGH>;
+		video-led {
+			label = "video-blue";
+			gpios = <&porta 2 GPIO_ACTIVE_HIGH>;
 			default-state = "off";
 		};
 
-		wan-led {
-			label = "wan-yellow";
+		link-led {
+			label = "link-yellow";
+			gpios = <&portc 16 GPIO_ACTIVE_HIGH>;
+			default-state = "off";
+		};
+
+
+		pgood_led {
+			label = "pgood-led";
 			gpios = <&portc 4 GPIO_ACTIVE_HIGH>;
 			default-state = "off";
 		};
-
+		
 		sys_led {
-			gpios = <&portg 1 GPIO_ACTIVE_HIGH>;
-			label = "system-green";
+			gpios = <&portg 3 GPIO_ACTIVE_HIGH>;
+			label = "sys-led";
 			linux,default-trigger = "heartbeat";
 			default-state = "on";
 		};

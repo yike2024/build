@@ -21,6 +21,7 @@ IN_ADDR_B="\${ramdisk_addr_b}"
 OUT_ADDR="\${unzip_addr}"
 
 RECOVERY_DIR=recovery_files
+DATA_DIR=${OUTPUT_DIR}/data
 PARTITION_FILE=partition32G.xml
 BOOTCMD_SCRIPT=boot_emmc
 SPIFCMD_SCRIPT=boot_spif
@@ -516,9 +517,16 @@ function do_gen_partition_subimg()
 					sudo tar -xzf ${PART_COMPRESS_FILE_NAME[$2]} -C $RECOVERY_DIR/$MOUNT_DIR-$2
 				fi
 				sync
-				sleep 1 # wait for sync
+				sleep 10
 				sudo umount $RECOVERY_DIR/$MOUNT_DIR-$2
-			else
+			elif [ "$1" == "data" ]; then
+				mkdir -p $RECOVERY_DIR/$MOUNT_DIR-$2
+				sudo mount $RECOVERY_DIR/$1 $RECOVERY_DIR/$MOUNT_DIR-$2
+                		sudo cp -rf ${DATA_DIR}/* $RECOVERY_DIR/$MOUNT_DIR-$2
+                		sync
+                		sleep 10
+				sudo umount $RECOVERY_DIR/$MOUNT_DIR-$2
+            		else
 				echo $1 may be an empty parition.
 			fi
 		fi
